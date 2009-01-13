@@ -59,10 +59,12 @@ module Sequel
     #   # Some other code of move_to method
     # end
     #end
-    def self.define_hook(hook)
-      @hooks[hook] = []
-      instance_eval("def #{hook}(method = nil, &block); define_hook_instance_method(:#{hook}); add_hook(:#{hook}, method, &block) end")
-      class_eval("def #{hook}; end")
+    def self.define_hook(*hooks)
+      hooks.each do |hook|
+        @hooks[hook] = []
+        instance_eval("def #{hook}(method = nil, &block); define_hook_instance_method(:#{hook}); add_hook(:#{hook}, method, &block) end")
+        class_eval("def #{hook}; end")
+      end
     end
 
     # Define a hook instance method that calls the run_hooks instance method.
@@ -82,8 +84,6 @@ module Sequel
     
     # For performance reasons, we define empty hook instance methods, which are
     # overwritten with real hook instance methods whenever the hook class method is called.
-    (HOOKS + PRIVATE_HOOKS).each do |hook|
-      define_hook(hook)
-    end
+    define_hook(*(HOOKS + PRIVATE_HOOKS))
   end
 end

@@ -432,8 +432,7 @@ end
 describe "Model#define_hook" do
   setup do
     class Foo < Sequel::Model(:items)
-      define_hook :before_bar
-      define_hook :after_bar
+      define_hook :before_bar, :after_bar
 
       def bar
         return if before_bar == false
