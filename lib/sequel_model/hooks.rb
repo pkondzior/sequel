@@ -36,29 +36,31 @@ module Sequel
       end
     end
 
-    #This method allows to define own hook method for model. It will define 2
-    #methods, ClassMethods#your_hook and InstanceMethods#your_hook. With
-    #ClassMethods#your_hook you are able to pass block that should be called
-    #when InstanceMethods#your_hook is invoked.
+    # Method allows to define own hook method for model. It will define 2
+    # methods, ClassMethods#your_hook and InstanceMethods#your_hook. With
+    # ClassMethods#your_hook you are able to pass block that should be called
+    # when InstanceMethods#your_hook will be invoked.
+    # 
+    # If InstanceMethods#your_hook returns false method that's invoking your
+    # hook should be stoped. It's of course only internal standard, and if you
+    # really don't like this behaviour you are not forced to use this. But still
+    # it's highly recommended.
+    # 
+    # Example of usage:
     #
-    #If InstanceMethods#your_hook returns false method that is invoking your
-    #hook should be stoped. It's of course only internal standard, and if you
-    #really don't like this behaviour you are not forced to use this. But still
-    #it's highly recommended
-    #
-    #class MyModel
-    # define_hook :before_move_to
-    # before_move_to { STDERR.puts "I'm in before move_to method"
-    # def move_to
-    #   if before_move_to
-    #     STDERR.puts "before_move_to hook returned true so i can move on"
-    #   else
-    #     STDERR.puts "before_move_to hook returned false so i should stop now"
-    #     return
+    #  class MyModel
+    #   define_hook :before_move_to
+    #   before_move_to { STDERR.puts "I'm in before move_to method"
+    #   def move_to
+    #     if before_move_to
+    #       STDERR.puts "before_move_to hook returned true so i can move on"
+    #     else
+    #       STDERR.puts "before_move_to hook returned false so i should stop now"
+    #       return
+    #     end
+    #     # Some other code of move_to method
     #   end
-    #   # Some other code of move_to method
-    # end
-    #end
+    #  end
     def self.define_hook(*hooks)
       hooks.each do |hook|
         @hooks[hook] = []
