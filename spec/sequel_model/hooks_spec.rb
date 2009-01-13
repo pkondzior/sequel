@@ -437,7 +437,6 @@ describe "Model#define_hook" do
       def bar
         return if before_bar == false
         return if after_bar == false
-        return true
       end
     end
     @f = Class.new(Foo)
