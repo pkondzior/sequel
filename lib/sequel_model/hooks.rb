@@ -36,6 +36,29 @@ module Sequel
       end
     end
 
+    # This method allows to define own hook method for model
+    #
+    # class MyModel
+    #   define_hook :before_move_to
+    #   before_move_to { STDERR.puts "I'm in before move_to method"
+    #   def move_to
+    #     if before_move_to
+    #       STDERR.puts "before_move_to hook returned true so i can move on"
+    #     else
+    #       STDERR.puts "before_move_to hook returned false so i should stop now"
+    #       return
+    #     end
+    #     # Some other code of move_to method
+    #   end
+    # end
+    #
+    # It's better to use this method internally, in plugins to keep code of your model clean.
+    def self.define_hook(hook)
+      @hooks[hook] = []
+      instance_eval("def #{hook}(method = nil, &block); define_hook_instance_method(:#{hook}); add_hook(:#{hook}, method, &block) end")
+      class_eval("def #{hook}; end")
+    end
+
     # Define a hook instance method that calls the run_hooks instance method.
     def self.define_hook_instance_method(hook) #:nodoc:
       class_eval("def #{hook}; run_hooks(:#{hook}); end")
@@ -43,7 +66,7 @@ module Sequel
 
     private_class_method :add_hook, :define_hook_instance_method
 
-    private 
+    private
 
     # Runs all hook blocks of given hook type on this object.
     # Stops running hook blocks and returns false if any hook block returns false.
@@ -54,9 +77,7 @@ module Sequel
     # For performance reasons, we define empty hook instance methods, which are
     # overwritten with real hook instance methods whenever the hook class method is called.
     (HOOKS + PRIVATE_HOOKS).each do |hook|
-      @hooks[hook] = []
-      instance_eval("def #{hook}(method = nil, &block); define_hook_instance_method(:#{hook}); add_hook(:#{hook}, method, &block) end")
-      class_eval("def #{hook}; end")
+      define_hook(hook)
     end
   end
 end
