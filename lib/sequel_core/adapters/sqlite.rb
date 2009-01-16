@@ -82,10 +82,16 @@ module Sequel
           return yield(conn) if conn.transaction_active?
           begin
             result = nil
+            log_info(begin_transaction_sql)
             conn.transaction{result = yield(conn)}
             result
           rescue ::Exception => e
+            log_info(rollback_transaction_sql)
             transaction_error(e, SQLite3::Exception)
+          ensure
+            unless e
+              log_info(commit_transaction_sql)
+            end
           end
         end
       end
